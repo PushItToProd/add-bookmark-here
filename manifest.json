@@ -3,6 +3,11 @@
   "name": "Bookmark Here",
   "version": "0.1",
   "description": "Allows bookmarking the current page from the bookmarks context menu.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "bookmark-here@example.com"
+    }
+  },
 
   "permissions": ["menus", "contextMenus", "bookmarks", "tabs"],
 
