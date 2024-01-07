@@ -2,6 +2,13 @@
 
 Adds a context menu item to bookmarks allowing you to add a bookmark to a particular folder.
 
+## Testing
+
+- Run `make run`.
+- Hit C-b to open the bookmarks sidebar.
+- Right click on a bookmark or folder. There should be an "Add bookmark here" menu item.
+- Click "Add bookmark here". A bookmark with the current page's URL and title should be added to the selected folder.
+
 ## References
 
 - examples
