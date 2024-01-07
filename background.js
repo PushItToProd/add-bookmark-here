@@ -27,11 +27,9 @@ async function getActiveTab() {
   return activeTab;
 }
 
-browser.contextMenus.onClicked.addListener(async (info) => {
-  if (info.menuItemId !== ADD_BOOKMARK_HERE_MENU_ID) return;
+browser.contextMenus.onClicked.addListener(async ({menuItemId, bookmarkId} = info) => {
+  if (menuItemId !== ADD_BOOKMARK_HERE_MENU_ID) return;
 
-  // get the ID of the bookmark that was clicked on
-  let {bookmarkId} = info;
   if (!bookmarkId) {
     throw "expected a bookmarkId but didn't get one";
   }
@@ -39,7 +37,6 @@ browser.contextMenus.onClicked.addListener(async (info) => {
   let bookmarkFolder = await getBookmarkFolder(bookmarkId);
   console.debug("bookmark destination folder:", bookmarkFolder);
 
-  // get current page info for bookmark creation
   let activeTab = await getActiveTab();
   console.debug("current tab:", activeTab);
 
