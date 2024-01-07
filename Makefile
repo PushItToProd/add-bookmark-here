@@ -1,6 +1,6 @@
 .PHONY: run
 run:
-	web-ext run
+	web-ext run --devtools
 
 .PHONY: build
 build:
