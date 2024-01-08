@@ -9,13 +9,21 @@ browser.contextMenus.create(
   () => void browser.runtime.lastError,
 );
 
-async function getBookmarkFolder(bookmarkId) {
-  let [selectedBookmark] = await browser.bookmarks.get(bookmarkId);
+async function getBookmarkDestination(selectedBookmarkId) {
+  let [selectedBookmark] = await browser.bookmarks.get(selectedBookmarkId);
+
+  // if the selected bookmark is a folder, return just the folder ID
   if (selectedBookmark.type === "folder") {
-    return selectedBookmark;
+    return {parentId: selectedBookmark.id};
   }
-  let [bookmarkFolder] = await browser.bookmarks.get(selectedBookmark.parentId);
-  return bookmarkFolder;
+
+  // if the selected bookmark is not a folder, return the parent folder ID and
+  // set the index so the new bookmark will be added immediately after the
+  // selected bookmark
+  return {
+    parentId: selectedBookmark.parentId,
+    index: selectedBookmark.index + 1,
+  };
 }
 
 async function getActiveTab() {
@@ -34,18 +42,19 @@ browser.contextMenus.onClicked.addListener(async ({menuItemId, bookmarkId} = inf
     throw "expected a bookmarkId but didn't get one";
   }
 
-  let bookmarkFolder = await getBookmarkFolder(bookmarkId);
-  console.debug("bookmark destination folder:", bookmarkFolder);
+  let bookmarkDestination = await getBookmarkDestination(bookmarkId);
+  console.debug("bookmark destination:", bookmarkDestination);
 
   let activeTab = await getActiveTab();
   console.debug("current tab:", activeTab);
 
   let bookmarkDetails = {
-    parentId: bookmarkFolder.id,
+    ...bookmarkDestination,
     title: activeTab.title,
     url: activeTab.url,
     type: "bookmark",
   };
+  console.debug("bookmark details:", bookmarkDetails);
 
   browser.bookmarks.create(bookmarkDetails);
 });
