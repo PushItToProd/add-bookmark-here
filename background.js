@@ -1,9 +1,20 @@
 const ADD_BOOKMARK_HERE_MENU_ID = "add-bookmark-here";
+const ADD_FOLDER_HERE_MENU_ID = "add-folder-here";
+const MENU_ITEM_IDS = [ADD_BOOKMARK_HERE_MENU_ID, ADD_FOLDER_HERE_MENU_ID];
 
 browser.contextMenus.create(
   {
     id: ADD_BOOKMARK_HERE_MENU_ID,
     title: "Add bookmark here",
+    contexts: ["bookmark"]
+  },
+  () => void browser.runtime.lastError,
+);
+
+browser.contextMenus.create(
+  {
+    id: ADD_FOLDER_HERE_MENU_ID,
+    title: "Add folder here",
     contexts: ["bookmark"]
   },
   () => void browser.runtime.lastError,
@@ -35,8 +46,19 @@ async function getActiveTab() {
   return activeTab;
 }
 
+async function getCurrentTabBookmark() {
+  let activeTab = await getActiveTab();
+  console.debug("current tab:", activeTab);
+
+  return {
+    title: activeTab.title,
+    url: activeTab.url,
+    type: "bookmark",
+  };
+}
+
 browser.contextMenus.onClicked.addListener(async ({menuItemId, bookmarkId} = info) => {
-  if (menuItemId !== ADD_BOOKMARK_HERE_MENU_ID) return;
+  if (!MENU_ITEM_IDS.includes(menuItemId)) return;
 
   if (!bookmarkId) {
     throw "expected a bookmarkId but didn't get one";
@@ -45,15 +67,26 @@ browser.contextMenus.onClicked.addListener(async ({menuItemId, bookmarkId} = inf
   let bookmarkDestination = await getBookmarkDestination(bookmarkId);
   console.debug("bookmark destination:", bookmarkDestination);
 
-  let activeTab = await getActiveTab();
-  console.debug("current tab:", activeTab);
+  let bookmarkDetails;
+  switch (menuItemId) {
+    case ADD_BOOKMARK_HERE_MENU_ID:
+      let tabBookmarkDetails = await getCurrentTabBookmark();
+      bookmarkDetails = {
+        ...bookmarkDestination,
+        ...tabBookmarkDetails,
+      };
+      break;
+    case ADD_FOLDER_HERE_MENU_ID:
+      bookmarkDetails = {
+        ...bookmarkDestination,
+        type: 'folder',
+        title: 'New folder',
+      };
+      break;
+    default:
+      throw `unsupported menu item ID: ${menuItemId}`;
+  }
 
-  let bookmarkDetails = {
-    ...bookmarkDestination,
-    title: activeTab.title,
-    url: activeTab.url,
-    type: "bookmark",
-  };
   console.debug("bookmark details:", bookmarkDetails);
 
   browser.bookmarks.create(bookmarkDetails);
