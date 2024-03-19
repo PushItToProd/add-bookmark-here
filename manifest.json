@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Bookmark Here",
-  "version": "0.3",
+  "version": "0.4",
   "description": "Allows bookmarking the current page from the bookmarks context menu.",
   "browser_specific_settings": {
     "gecko": {

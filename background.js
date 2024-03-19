@@ -2,10 +2,12 @@ const ADD_BOOKMARK_HERE_MENU_ID = "add-bookmark-here";
 const ADD_FOLDER_HERE_MENU_ID = "add-folder-here";
 const MENU_ITEM_IDS = [ADD_BOOKMARK_HERE_MENU_ID, ADD_FOLDER_HERE_MENU_ID];
 
-browser.runtime.onInstalled.addListener(() => {
-  // set up menu items in the onInstalled listener since this is a
-  // non-persistent background page
-  // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/menus/create
+function setupMenus() {
+  // contrary to what the docs say, we need to run this unconditionally. if we
+  // invoke this from a browser.runtime.onInstalled handler, the menu items will
+  // end up disappearing.
+  // (https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/menus/create)
+
   browser.contextMenus.create(
     {
       id: ADD_BOOKMARK_HERE_MENU_ID,
@@ -14,16 +16,9 @@ browser.runtime.onInstalled.addListener(() => {
     },
     () => void browser.runtime.lastError,
   );
+}
 
-  browser.contextMenus.create(
-    {
-      id: ADD_FOLDER_HERE_MENU_ID,
-      title: "Add folder here",
-      contexts: ["bookmark"]
-    },
-    () => void browser.runtime.lastError,
-  );
-});
+setupMenus();
 
 async function getBookmarkDestination(selectedBookmarkId) {
   let [selectedBookmark] = await browser.bookmarks.get(selectedBookmarkId);
