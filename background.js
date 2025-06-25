@@ -1,6 +1,5 @@
 const ADD_BOOKMARK_HERE_MENU_ID = "add-bookmark-here";
-const ADD_FOLDER_HERE_MENU_ID = "add-folder-here";
-const MENU_ITEM_IDS = [ADD_BOOKMARK_HERE_MENU_ID, ADD_FOLDER_HERE_MENU_ID];
+const MENU_ITEM_IDS = [ADD_BOOKMARK_HERE_MENU_ID];
 
 function setupMenus() {
   // contrary to what the docs say, we need to run this unconditionally. if we
@@ -74,13 +73,6 @@ browser.contextMenus.onClicked.addListener(async ({menuItemId, bookmarkId} = inf
       bookmarkDetails = {
         ...bookmarkDestination,
         ...tabBookmarkDetails,
-      };
-      break;
-    case ADD_FOLDER_HERE_MENU_ID:
-      bookmarkDetails = {
-        ...bookmarkDestination,
-        type: 'folder',
-        title: 'New folder',
       };
       break;
     default:
