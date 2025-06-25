@@ -2,9 +2,6 @@ const ADD_BOOKMARK_HERE_MENU_ID = "add-bookmark-here";
 const MENU_ITEM_IDS = [ADD_BOOKMARK_HERE_MENU_ID];
 
 function setupMenus() {
-  // contrary to what the docs say, we need to run this unconditionally. if we
-  // invoke this from a browser.runtime.onInstalled handler, the menu items will
-  // end up disappearing.
   // (https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/menus/create)
 
   browser.contextMenus.create(
@@ -17,12 +14,16 @@ function setupMenus() {
   );
 }
 
+// Contrary to what the docs say, we need to run this unconditionally. if we
+// invoke this from a browser.runtime.onInstalled handler, the menu items will
+// end up disappearing.
 setupMenus();
 
 async function getBookmarkDestination(selectedBookmarkId) {
   let [selectedBookmark] = await browser.bookmarks.get(selectedBookmarkId);
 
-  // if the selected bookmark is a folder, return just the folder ID
+  // if the selected bookmark is a folder, return just the folder ID with no
+  // index to create the bookmark as the last entry in the folder.
   if (selectedBookmark.type === "folder") {
     return {parentId: selectedBookmark.id};
   }
@@ -57,6 +58,7 @@ async function getCurrentTabBookmark() {
 }
 
 browser.contextMenus.onClicked.addListener(async ({menuItemId, bookmarkId} = info) => {
+  // ignore menu items that aren't for this extension
   if (!MENU_ITEM_IDS.includes(menuItemId)) return;
 
   if (!bookmarkId) {
@@ -76,6 +78,7 @@ browser.contextMenus.onClicked.addListener(async ({menuItemId, bookmarkId} = inf
       };
       break;
     default:
+      // this should never happen
       throw `unsupported menu item ID: ${menuItemId}`;
   }
 
